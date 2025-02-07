@@ -34,7 +34,7 @@
           <p>Follow these steps to install and configure the GitHub Readme Stats application:</p>
           <ol>
             <li>Clone the repository to your local machine using the following command:</li>
-            <pre><code>git clone &lt;your-repository-url&gt;</code></pre>
+            <pre><code>git clone https://github.com/RyuZinOh/github-streaks</code></pre>
             <li>Install the necessary dependencies by running:</li>
             <pre><code>pip install -r requirements.txt</code></pre>
             <li>
@@ -42,7 +42,7 @@
               <pre><code>GITHUB_TOKEN=your_personal_access_token</code></pre>
             </li>
             <li>
-              If you don’t have a GitHub token, generate one by visiting
+              If you don't have a GitHub token, generate one by visiting
               <a href="https://github.com/settings/tokens" target="_blank"
                 >GitHub's Personal Access Tokens page</a
               >.
@@ -97,7 +97,7 @@
       <div class="github-link">
         <h2>GitHub Repository</h2>
         <p>Visit the GitHub repository for more details and source code:</p>
-        <a href="https://github.com/yourusername/repository" target="_blank" class="github-btn"
+        <a href="https://github.com/RyuZinOh/github-streaks" target="_blank" class="github-btn"
           >GitHub Repository</a
         >
       </div>
