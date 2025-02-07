@@ -7,8 +7,7 @@ from dotenv import load_dotenv
 from fastapi.responses import StreamingResponse
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
-import base64
-from fastapi.responses import JSONResponse
+
 
 
 load_dotenv()
@@ -163,8 +162,7 @@ def get_streak_image(username: str):
     background_img.save(img_io, "PNG")
     img_io.seek(0)
 
-    img_base64 = base64.b64encode(img_io.getvalue()).decode("utf-8")
+    # Adding cache-control headers
+    headers = {"Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate"}
 
-    print(f"Generated base64 image: {img_base64[:50]}...")  
-
-    return JSONResponse(content={"image_base64": img_base64})
+    return StreamingResponse(img_io, media_type="image/png", headers=headers)
