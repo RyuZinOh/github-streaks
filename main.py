@@ -115,6 +115,29 @@ def load_font(size: int, bold=False):
 
 
 ## Generate the image
+
+
+def fetch_github_avatar(username: str):
+    avatar_url = f"https://avatars.githubusercontent.com/{username}"
+    response = requests.get(avatar_url)
+
+    if response.status_code != 200:
+        raise HTTPException(status_code=500, detail="Error fetching GitHub avatar")
+
+    avatar_img = Image.open(BytesIO(response.content))
+    avatar_img = avatar_img.resize((50, 50))  # Resize avatar to 50x50 px
+
+    # Create a circular mask for the avatar
+    mask = Image.new("L", avatar_img.size, 0)
+    draw = ImageDraw.Draw(mask)
+    draw.ellipse((0, 0, avatar_img.size[0], avatar_img.size[1]), fill=255)
+
+    # Apply the mask to the avatar to make it circular
+    avatar_img.putalpha(mask)
+    return avatar_img
+
+
+
 @app.get("/streak/{username}/image")
 def get_streak_image(username: str):
     try:
@@ -133,6 +156,7 @@ def get_streak_image(username: str):
         font_big = load_font(40, bold=True)
         font_small = load_font(24)
         font_streak = load_font(50, bold=True)
+        font_year = load_font(60, bold=True)  # Font for the current year
 
         draw.text((40, 40), f"{username}'s GitHub Streak", font=font_big, fill="#FFFFFF")
 
@@ -150,10 +174,22 @@ def get_streak_image(username: str):
         for i in range(int(bar_width * streak_percentage / 100)):
             draw.line([(40 + i, streak_box_y + streak_box_size + 60), (40 + i, streak_box_y + streak_box_size + 60 + bar_height)], fill=(255, 255, 255))
 
-        draw.text((40, streak_box_y + streak_box_size + 100), f"{streak_percentage:.2f}% of the year", font=font_small, fill="#FFFFFF")
+        draw.text((40, streak_box_y + streak_box_size + 100), f"{streak_percentage:.2f}% of this year", font=font_small, fill="#FFFFFF")
 
         today = datetime.now().strftime("%B %d, %Y")
         draw.text((40, streak_box_y + streak_box_size + 140), f"Today's Date: {today}", font=font_small, fill="#FFFFFF")
+
+        # Fetch and add the avatar to the top-right corner
+        avatar_img = fetch_github_avatar(username)
+        avatar_x = background_img.width - avatar_img.width - 20  # Position from right
+        avatar_y = 20  # Position from top
+        background_img.paste(avatar_img, (avatar_x, avatar_y), avatar_img)  # Pasting with alpha channel
+
+        # Add current year in a large font on the right side, opposite the streak box
+        current_year = datetime.now().year
+        year_x = background_img.width - 180  # Position from right
+        year_y = streak_box_y + (streak_box_size // 2) - 30  # Vertical alignment with streak box
+        draw.text((year_x, year_y), str(current_year), font=font_year, fill="#FFFFFF")
 
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Background image not found")
