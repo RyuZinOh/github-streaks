@@ -10,96 +10,89 @@
           dynamic GitHub stats images to display on your profile readme.
         </p>
 
-        <!-- Sample Image Section -->
         <section id="sample-image">
           <h2>Sample Image</h2>
           <p>This is the generated image that will be reflected in your GitHub readme.</p>
           <img src="@/assets/response.png" alt="Sample GitHub Streaks Dashboard" />
         </section>
 
-        <!-- How It Works Section -->
         <section id="how-it-works">
           <h2>How It Works</h2>
           <p>
-            The application tracks the contributions of a single GitHub user and generates a dynamic
-            stats image. This image can be embedded in your GitHub readme markdown, reflecting your
+            The application tracks a GitHub user's contributions and generates a dynamic stats
+            image. This image can be embedded in your GitHub readme markdown, reflecting your
             streaks and activity on the platform. It's designed for personal use and provides
-            real-time data from GitHub.
+            real-time data.
           </p>
         </section>
 
-        <!-- Installation Section -->
         <section id="installation">
           <h2>Installation</h2>
           <p>Follow these steps to install and configure the GitHub Readme Stats application:</p>
           <ol>
-            <li>Clone the repository to your local machine using the following command:</li>
+            <li>Clone the repository:</li>
             <pre><code>git clone https://github.com/RyuZinOh/github-streaks</code></pre>
-            <li>Install the necessary dependencies by running:</li>
+            <li>Install dependencies:</li>
             <pre><code>pip install -r requirements.txt</code></pre>
             <li>
-              Create a `.env` file in the root directory and add your GitHub personal access token:
+              Create a <code>.env</code> file and add your GitHub token:
               <pre><code>GITHUB_TOKEN=your_personal_access_token</code></pre>
             </li>
             <li>
-              If you don't have a GitHub token, generate one by visiting
-              <a href="https://github.com/settings/tokens" target="_blank"
-                >GitHub's Personal Access Tokens page</a
-              >.
+              Generate a GitHub token
+              <a href="https://github.com/settings/tokens" target="_blank">here</a>.
             </li>
-            <li>Start the FastAPI server locally by running:</li>
+            <li>Start the FastAPI server:</li>
             <pre><code>uvicorn main:app --reload</code></pre>
-            <li>Access the running app in your browser by navigating to:</li>
+            <li>Access the app:</li>
             <pre><code>http://localhost:8000</code></pre>
           </ol>
         </section>
 
-        <!-- Hosting Section -->
         <section id="hosting">
           <h2>How to Host</h2>
-          <p>
-            To make the app publicly accessible, you can use Cloudflare's tunneling service to
-            expose your local server:
-          </p>
+          <p>Use Cloudflare's tunneling service for public access:</p>
           <ol>
             <li>
-              Install Cloudflared following the official guide from
+              Install Cloudflared from
               <a
                 href="https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/install-and-setup/"
                 target="_blank"
-                >Cloudflare</a
+                >here</a
               >.
             </li>
-            <li>Start the tunnel by running this command in your terminal:</li>
+            <li>Start the tunnel:</li>
             <pre><code>cloudflared tunnel --url http://localhost:8000</code></pre>
-            <li>Once the tunnel starts, your app will be accessible on a Cloudflare subdomain.</li>
+            <li>Your app will be accessible on a Cloudflare subdomain.</li>
             <li>
-              Example: If you are using a subdomain like
-              <code>https://dealer.safallama.com.np/streak/ryuzinoh/image</code>, you can embed this
-              link in your GitHub markdown like so:
+              Embed in your GitHub readme:
               <pre><code>![readme](your_link_hosted_on_cloudflare)</code></pre>
             </li>
           </ol>
+          <p>
+            <strong>Alternative:</strong> Use Render for hosting as it securely handles environment
+            variables.
+          </p>
         </section>
 
         <!-- Navigation Links -->
         <nav>
           <ul>
-            <li><a href="#sample-image">Go to Sample Image</a></li>
-            <li><a href="#how-it-works">How Does It Work?</a></li>
-            <li><a href="#installation">Go to Installation</a></li>
-            <li><a href="#hosting">Go to Hosting</a></li>
+            <li><a href="#sample-image">Sample Image</a></li>
+            <li><a href="#how-it-works">How It Works</a></li>
+            <li><a href="#installation">Installation</a></li>
+            <li><a href="#hosting">Hosting</a></li>
           </ul>
         </nav>
       </div>
 
-      <!-- GitHub URL Section (Right side of the page) -->
+      <!-- GitHub Repository Section -->
       <div class="github-link">
         <h2>GitHub Repository</h2>
-        <p>Visit the GitHub repository for more details and source code:</p>
-        <a href="https://github.com/RyuZinOh/github-streaks" target="_blank" class="github-btn"
-          >GitHub Repository</a
-        >
+        <p>Check out the full source code and contribute to the project.</p>
+        <a href="https://github.com/RyuZinOh/github-streaks" target="_blank" class="github-btn">
+          View on GitHub
+        </a>
       </div>
     </div>
   </div>
@@ -114,7 +107,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* Styling for the documentation */
 .home {
   display: flex;
   justify-content: center;
@@ -124,12 +116,12 @@ export default defineComponent({
 .content {
   display: flex;
   justify-content: space-between;
-  width: 100%;
+  width: max-content;
+  gap: 40px;
 }
 
 .documentation {
   max-width: 800px;
-  margin-right: 30px;
   font-family: Arial, sans-serif;
 }
 
@@ -148,25 +140,20 @@ ol {
   padding-left: 20px;
 }
 
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-code,
-pre {
+pre,
+code {
   background-color: #f4f4f4;
-  padding: 3px 6px;
+  padding: 5px;
   border-radius: 4px;
-}
-
-pre {
-  padding: 10px;
-  overflow-x: auto;
+  font-family: monospace;
 }
 
 nav {
   margin-top: 40px;
+}
+
+nav ul {
+  padding: 0;
 }
 
 nav ul li {
@@ -186,33 +173,34 @@ nav a:hover {
 img {
   max-width: 100%;
   height: auto;
-  border: 1px solid #ddd;
   border-radius: 5px;
 }
 
-/* GitHub link styling */
+/* Expanded GitHub Link Section */
 .github-link {
-  max-width: 250px;
-  background-color: #f4f4f4;
+  flex: 1; /* Make it take up space */
+  min-width: 300px; /* Prevent it from being too small */
   padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #f4f4f4;
+  text-align: center;
 }
 
 .github-link h2 {
   color: #333;
+  margin-bottom: 15px;
 }
 
 .github-btn {
-  display: inline-block;
-  padding: 10px 15px;
+  display: block;
+  padding: 12px 20px;
   background-color: #24292f;
   color: #fff;
-  text-decoration: none;
+  font-size: 16px;
   font-weight: bold;
   border-radius: 5px;
-  text-align: center;
-  width: 100%;
+  text-decoration: none;
+  margin-top: 10px;
+  transition: background 0.3s;
 }
 
 .github-btn:hover {
