@@ -120,9 +120,9 @@ def fetch_github_avatar(username: str):
 @app.get("/streak/{username}/image")
 def get_streak_image(username: str):
     if username != "ryuzinoh":
-        background_img = Image.new("RGBA", (600, 400), (255, 255, 255))  # White background
+        background_img = Image.new("RGBA", (600, 350), (255, 255, 255))  
         draw = ImageDraw.Draw(background_img)
-        font_small = load_font(24)
+        font_small = load_font(22)
         message = "Bruh, thought you could sneak in? \n Use the provided source code and \nhost it yourself! \n xD"
         draw.text((40, 140), message, font=font_small, fill="#000000")
         img_io = BytesIO()
@@ -134,41 +134,41 @@ def get_streak_image(username: str):
         streak_data = get_github_streak(username)
         current_streak = streak_data["streak_days_from_2024_to_today"]
         total_contributions = streak_data["total_contributions"]
-        background_img = Image.open("assets/template.jpg").convert("RGBA").resize((600, 400))
+        background_img = Image.open("assets/template.jpg").convert("RGBA").resize((600, 350))
         overlay = Image.new("RGBA", background_img.size, (0, 0, 0, 128))
         background_img = Image.alpha_composite(background_img, overlay).convert("RGB")
         draw = ImageDraw.Draw(background_img)
         
         title_color = "#FF5733"
-        text_color = "#4A90E2"
+        text_color = "#FFFFFF"  
         streak_color = "#34C759"
         year_color = "#FFD700"
         
-        font_big = load_font(40, bold=True)
-        font_small = load_font(24)
-        font_streak = load_font(50, bold=True)
-        font_year = load_font(60, bold=True)
+        font_big = load_font(30, bold=True)
+        font_small = load_font(22)
+        font_streak = load_font(45, bold=True)
+        font_year = load_font(55, bold=True)
         
-        draw.text((10, 20), f"{username}'s GitHub Streak", font=font_big, fill=title_color)
-        draw.rectangle([40, 90, 160, 210], outline=streak_color, width=2)
-        draw.text((60, 120), f"{current_streak}", font=font_streak, fill=streak_color)
-        draw.text((60, 180), "days", font=font_small, fill=text_color)
-        draw.text((40, 230), f"Total Contributions: {total_contributions}", font=font_small, fill=text_color)
+        draw.text((10, 0), f"{username}'s GitHub Streak", font=font_big, fill=title_color)
+        draw.rectangle([40, 60, 160, 180], outline=streak_color, width=2)
+        draw.text((60, 90), f"{current_streak}", font=font_streak, fill=streak_color)
+        draw.text((60, 150), "days", font=font_small, fill=text_color)
+        draw.text((40, 180), f"Total Contributions: {total_contributions}", font=font_small, fill=text_color)
         
         streak_percentage = (current_streak / 365) * 100
-        draw.rectangle([(40, 270), (540, 300)], outline=streak_color, width=2)
+        draw.rectangle([(40, 220), (540, 250)], outline=streak_color, width=2)
         for i in range(int(500 * streak_percentage / 100)):
-            draw.line([(40 + i, 270), (40 + i, 300)], fill=streak_color)
-        draw.text((40, 310), f"{streak_percentage:.2f}% of this year", font=font_small, fill=text_color)
+            draw.line([(40 + i, 220), (40 + i, 250)], fill=streak_color)
+        draw.text((40, 260), f"{streak_percentage:.2f}% of this year", font=font_small, fill=text_color)
         
         today = datetime.now().strftime("%B %d, %Y")
-        draw.text((40, 340), f"Today's Date: {today}", font=font_small, fill=text_color)
+        draw.text((40, 290), f"Today's Date: {today}", font=font_small, fill=text_color)
         
         avatar_img = fetch_github_avatar(username)
-        avatar_img = avatar_img.resize((80, 80))
-        background_img.paste(avatar_img, (515, 20), avatar_img)
+        avatar_img = avatar_img.resize((100, 100))  # Increased avatar size
+        background_img.paste(avatar_img, (479, 20), avatar_img)  # Shifted slightly to the right
         
-        draw.text((420, 140), str(datetime.now().year), font=font_year, fill=year_color)
+        draw.text((420, 120), str(datetime.now().year), font=font_year, fill=year_color)
     
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Background image not found")
