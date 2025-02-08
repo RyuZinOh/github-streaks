@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from fastapi.responses import StreamingResponse
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
+from fastapi.responses import StreamingResponse
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 load_dotenv()
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
@@ -105,26 +107,36 @@ def get_github_streak(username: str):
         "total_contributions": total_contributions
     }
 
-def fetch_github_avatar(username: str):
-    avatar_url = f"https://avatars.githubusercontent.com/{username}"
-    response = requests.get(avatar_url)
-    if response.status_code != 200:
-        raise HTTPException(status_code=500, detail="Error fetching GitHub avatar")
-    avatar_img = Image.open(BytesIO(response.content)).resize((50, 50))
-    mask = Image.new("L", avatar_img.size, 0)
+
+from PIL import Image, ImageDraw, ImageFilter
+import requests
+from io import BytesIO
+from fastapi import HTTPException
+
+def make_avatar_circular(avatar_img):
+    size = min(avatar_img.size)
+    mask = Image.new("L", (size, size), 0)
     draw = ImageDraw.Draw(mask)
-    draw.ellipse((0, 0, avatar_img.size[0], avatar_img.size[1]), fill=255)
+    draw.ellipse((0, 0, size, size), fill=255)
+    mask = mask.resize(avatar_img.size, Image.Resampling.LANCZOS)
     avatar_img.putalpha(mask)
     return avatar_img
+
+def fetch_github_avatar(username: str):
+    url = f"https://github.com/{username}.png"
+    response = requests.get(url)
+    if response.status_code != 200:
+        raise HTTPException(status_code=404, detail="GitHub user not found")
+    return Image.open(BytesIO(response.content))
 
 @app.get("/streak/{username}/image")
 def get_streak_image(username: str):
     if username != "ryuzinoh":
-        background_img = Image.new("RGBA", (600, 350), (255, 255, 255))  
+        background_img = Image.new("RGBA", (900, 550), (255, 255, 255))  # Reduced height
         draw = ImageDraw.Draw(background_img)
         font_small = load_font(22)
         message = "Bruh, thought you could sneak in? \n Use the provided source code and \nhost it yourself! \n xD"
-        draw.text((40, 140), message, font=font_small, fill="#000000")
+        draw.text((40, 240), message, font=font_small, fill="#000000")
         img_io = BytesIO()
         background_img.save(img_io, "PNG")
         img_io.seek(0)
@@ -134,44 +146,48 @@ def get_streak_image(username: str):
         streak_data = get_github_streak(username)
         current_streak = streak_data["streak_days_from_2024_to_today"]
         total_contributions = streak_data["total_contributions"]
-        background_img = Image.open("assets/template.jpg").convert("RGBA").resize((600, 350))
-        overlay = Image.new("RGBA", background_img.size, (0, 0, 0, 128))
-        background_img = Image.alpha_composite(background_img, overlay).convert("RGB")
+        
+        background_img = Image.new("RGBA", (900, 475), (255, 255, 255))  # Reduced height
         draw = ImageDraw.Draw(background_img)
         
-        title_color = "#FF5733"
-        text_color = "#FFFFFF"  
-        streak_color = "#34C759"
-        year_color = "#FFD700"
+        title_color = "#000000"
+        streak_color = "#000000"
+        text_color = "#000000"
+        year_color = "#000000"
         
-        font_big = load_font(30, bold=True)
-        font_small = load_font(22)
-        font_streak = load_font(45, bold=True)
-        font_year = load_font(55, bold=True)
-        
+        font_big = load_font(40, bold=True)
+        font_small = load_font(28)
+        font_streak = load_font(60, bold=True)
+        font_year = load_font(70, bold=True)
+        font_year_maxxr = load_font(120, bold=True)
+
         draw.text((10, 0), f"{username}'s GitHub Streak", font=font_big, fill=title_color)
-        draw.rectangle([40, 60, 160, 180], outline=streak_color, width=2)
-        draw.text((60, 90), f"{current_streak}", font=font_streak, fill=streak_color)
-        draw.text((60, 150), "days", font=font_small, fill=text_color)
-        draw.text((40, 180), f"Total Contributions: {total_contributions}", font=font_small, fill=text_color)
+        
+        draw.rectangle([40, 80, 220, 300], outline=streak_color, width=3)
+        draw.text((90, 120), f"{current_streak}", font=font_streak, fill=streak_color)
+        draw.text((90, 190), "days", font=font_small, fill=text_color)
+        draw.text((40, 430), f"Total Contributions: {total_contributions}", font=font_small, fill=text_color)
         
         streak_percentage = (current_streak / 365) * 100
-        draw.rectangle([(40, 220), (540, 250)], outline=streak_color, width=2)
-        for i in range(int(500 * streak_percentage / 100)):
-            draw.line([(40 + i, 220), (40 + i, 250)], fill=streak_color)
-        draw.text((40, 260), f"{streak_percentage:.2f}% of this year", font=font_small, fill=text_color)
+        draw.rectangle([(40, 320), (840, 350)], outline=streak_color, width=3)
+        for i in range(int(800 * streak_percentage / 100)):
+            draw.line([(40 + i, 320), (40 + i, 350)], fill=streak_color)
+        draw.text((40, 360), f"{streak_percentage:.2f}% of this year", font=font_small, fill=text_color)
         
         today = datetime.now().strftime("%B %d, %Y")
-        draw.text((40, 290), f"Today's Date: {today}", font=font_small, fill=text_color)
+        draw.text((40, 390), f"Today's Date: {today}", font=font_small, fill=text_color)
         
         avatar_img = fetch_github_avatar(username)
-        avatar_img = avatar_img.resize((100, 100))  # Increased avatar size
-        background_img.paste(avatar_img, (479, 20), avatar_img)  # Shifted slightly to the right
+        avatar_img = avatar_img.resize((150, 150), Image.Resampling.LANCZOS)
+        avatar_img = avatar_img.convert("RGBA")
+        avatar_img = make_avatar_circular(avatar_img)
         
-        draw.text((420, 120), str(datetime.now().year), font=font_year, fill=year_color)
-    
+        background_img.paste(avatar_img, (730, 40), avatar_img)
+        
+        draw.text((450, 180), str(datetime.now().year), font=font_year_maxxr, fill=year_color)  # Moved the year down
+        
     except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="Background image not found")
+        raise HTTPException(status_code=404, detail="Avatar image not found")
     
     img_io = BytesIO()
     background_img.save(img_io, "PNG")
