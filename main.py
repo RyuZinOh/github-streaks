@@ -123,7 +123,7 @@ def get_streak_image(username: str):
         background_img = Image.new("RGBA", (600, 400), (255, 255, 255))  # White background
         draw = ImageDraw.Draw(background_img)
         font_small = load_font(24)
-        message = "gahh,use the source code and host it yourself"
+        message = "Bruh, thought you could sneak in? \n Use the provided source code and \nhost it yourself! \n xD"
         draw.text((40, 140), message, font=font_small, fill="#000000")
         img_io = BytesIO()
         background_img.save(img_io, "PNG")
