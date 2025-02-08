@@ -108,10 +108,6 @@ def get_github_streak(username: str):
     }
 
 
-from PIL import Image, ImageDraw, ImageFilter
-import requests
-from io import BytesIO
-from fastapi import HTTPException
 
 def make_avatar_circular(avatar_img):
     size = min(avatar_img.size)
@@ -185,7 +181,8 @@ def get_streak_image(username: str):
         background_img.paste(avatar_img, (730, 40), avatar_img)
         
         draw.text((450, 180), str(datetime.now().year), font=font_year_maxxr, fill=year_color)  # Moved the year down
-        
+        draw.rectangle([0, 0, 899, 474], outline="black", width=5)
+
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Avatar image not found")
     
