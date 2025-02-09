@@ -229,6 +229,7 @@ def get_monkeytype_streak():
         "max_streak": max_streak,
         "last_active": last_date
     }
+    
 @app.get("/monkeytype/streak/image")
 def get_monkeytype_streak_image():
     try:
@@ -238,28 +239,26 @@ def get_monkeytype_streak_image():
         last_active = streak_data["last_active"]
 
         width, height = 600, 300
-        background_img = Image.open("assets/template.jpg")
-        background_img = background_img.resize((width, height))
 
-        overlay = Image.new("RGBA", (width, height), (0, 0, 0, 128))
-        background_img.paste(overlay, (0, 0), overlay)
-
+        # Create a white background
+        background_img = Image.new("RGB", (width, height), "white")
+        
+        # Create black top and bottom bars
         draw = ImageDraw.Draw(background_img)
-
         border_thickness = 2
-        draw.rectangle([0, 0, width, border_thickness], fill="white")
-        draw.rectangle([0, height - border_thickness, width, height], fill="white")
+        draw.rectangle([0, 0, width, border_thickness], fill="black")
+        draw.rectangle([0, height - border_thickness, width, height], fill="black")
 
         font_title = load_font(36, bold=True)
         font_max_streak = load_font(50, bold=True)
         font_data = load_font(32)
         font_small = load_font(13)
 
-        draw.text((20, 10), "My MonkeyType Streak", font=font_title, fill="white")
+        draw.text((20, 10), "My MonkeyType Streak", font=font_title, fill="black")
 
         text_y_position = 130
-        draw.text((20, text_y_position), "Max", font=font_max_streak, fill="white")
-        draw.text((20, text_y_position + 60), f"{max_streak} Days", font=font_data, fill="white")
+        draw.text((20, text_y_position), "Max", font=font_max_streak, fill="black")
+        draw.text((20, text_y_position + 60), f"{max_streak} Days", font=font_data, fill="black")
 
         text_y_position += 150
 
@@ -271,11 +270,11 @@ def get_monkeytype_streak_image():
         square_size = max(120, text_width + 30)
         square_x = width - square_size - 20
         square_y = 80
-        draw.rectangle([square_x, square_y, square_x + square_size, square_y + square_size], outline="white", width=4)
+        draw.rectangle([square_x, square_y, square_x + square_size, square_y + square_size], outline="black", width=4)
 
-        draw.text((square_x + (square_size - text_width) // 2, square_y + (square_size - text_height) // 2), streak_text, font=font_title, fill="white")
+        draw.text((square_x + (square_size - text_width) // 2, square_y + (square_size - text_height) // 2), streak_text, font=font_title, fill="black")
 
-        draw.text((width - 200, height - 25), f"Last Active: {last_active}", font=font_small, fill="white")
+        draw.text((width - 200, height - 25), f"Last Active: {last_active}", font=font_small, fill="black")
 
         img_io = BytesIO()
         background_img.save(img_io, "PNG", quality=95)
