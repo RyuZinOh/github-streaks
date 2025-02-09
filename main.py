@@ -255,7 +255,7 @@ def get_monkeytype_streak_image():
         font_data = load_font(32)
         font_small = load_font(13)
 
-        draw.text((20, 10), "Safal's MonkeyType Streak", font=font_title, fill="white")
+        draw.text((20, 10), "Happilli's MonkeyType Streak", font=font_title, fill="white")
 
         text_y_position = 130
         draw.text((20, text_y_position), "Max", font=font_max_streak, fill="white")
