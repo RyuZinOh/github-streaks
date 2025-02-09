@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import requests
@@ -12,6 +12,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 load_dotenv()
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+APE_KEY = os.getenv("APE_KEY")
 
 app = FastAPI()
 
@@ -24,6 +25,7 @@ app.add_middleware(
 )
 
 GITHUB_GRAPHQL_URL = "https://api.github.com/graphql"
+MONKEYTYPE_URL = "https://api.monkeytype.com/users/streak"
 
 def load_font(size: int, bold=False):
     font_path = "assets/Poppins-Bold.ttf" if bold else "assets/Poppins-Regular.ttf"
@@ -190,3 +192,92 @@ def get_streak_image(username: str):
     background_img.save(img_io, "PNG")
     img_io.seek(0)
     return StreamingResponse(img_io, media_type="image/png", headers={"Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate"})
+
+
+
+
+
+
+#for monkeytype streak
+
+def fetch_monkeytype_streak():
+    if not APE_KEY:
+        raise HTTPException(status_code=500, detail="MonkeyType API Key is missing!")
+    
+    headers = {"Authorization": f"ApeKey {APE_KEY}"}
+    response = requests.get(MONKEYTYPE_URL, headers=headers)
+    
+    if response.status_code != 200:
+        raise HTTPException(status_code=500, detail="Error fetching data from MonkeyType")
+    
+    return response.json()
+
+@app.get("/monkeytype/streak")
+def get_monkeytype_streak():
+    data = fetch_monkeytype_streak()
+    if "data" not in data:
+        raise HTTPException(status_code=404, detail="Streak data not found")
+    
+    streak_data = data["data"]
+    streak_length = streak_data.get("length", 0)
+    max_streak = streak_data.get("maxLength", 0)
+    last_timestamp = streak_data.get("lastResultTimestamp", 0)
+    last_date = datetime.fromtimestamp(last_timestamp / 1000, tz=timezone.utc).strftime("%B %d, %Y")
+    
+    return {
+        "streak_length": streak_length,
+        "max_streak": max_streak,
+        "last_active": last_date
+    }
+@app.get("/monkeytype/streak/image")
+def get_monkeytype_streak_image():
+    try:
+        streak_data = get_monkeytype_streak()
+        streak_length = streak_data["streak_length"]
+        max_streak = streak_data["max_streak"]
+        last_active = streak_data["last_active"]
+
+        width, height = 600, 300
+        background_img = Image.open("assets/template.jpg")
+        background_img = background_img.resize((width, height))
+
+        overlay = Image.new("RGBA", (width, height), (0, 0, 0, 128))
+        background_img.paste(overlay, (0, 0), overlay)
+
+        draw = ImageDraw.Draw(background_img)
+
+        font_title = load_font(36, bold=True)
+        font_max_streak = load_font(50, bold=True)  # Increased weight for Max Streak
+        font_data = load_font(32)  
+        font_small = load_font(13)  # Font size reduced for "Last Active"
+
+        draw.text((20, 10), "Safal's MonkeyType Streak", font=font_title, fill="white")  # Shifted more to top-left
+
+        # Adjusted the position and made Max Streak bold with larger font
+        text_y_position = 130
+        draw.text((20, text_y_position), "Max", font=font_max_streak, fill="white")  # Bold and bigger font
+        draw.text((20, text_y_position + 60), f"{max_streak} Days", font=font_data, fill="white")  # Placing the number of days below
+
+        text_y_position += 150 
+
+        streak_text = f"{streak_length}\nDays"
+        bbox = draw.textbbox((0, 0), streak_text, font=font_title)
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
+
+        square_size = max(120, text_width + 30)
+        square_x = width - square_size - 20
+        square_y = 80
+        draw.rectangle([square_x, square_y, square_x + square_size, square_y + square_size], outline="white", width=4)
+
+        draw.text((square_x + (square_size - text_width) // 2, square_y + (square_size - text_height) // 2), streak_text, font=font_title, fill="white")
+
+        draw.text((width - 200, height - 25), f"Last Active: {last_active}", font=font_small, fill="white")  # Moved left and at the absolute bottom
+
+        img_io = BytesIO()
+        background_img.save(img_io, "PNG")
+        img_io.seek(0)
+        return StreamingResponse(img_io, media_type="image/png", headers={"Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate"})
+
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Error generating streak image")
