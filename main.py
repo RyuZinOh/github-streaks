@@ -246,6 +246,13 @@ def get_monkeytype_streak_image():
 
         draw = ImageDraw.Draw(background_img)
 
+        # Set border thickness to a smaller value
+        border_thickness = 2  # Thinner border
+
+        # Adding top and bottom borders
+        draw.rectangle([0, 0, width, border_thickness], fill="white")  # Top border
+        draw.rectangle([0, height - border_thickness, width, height], fill="white")  # Bottom border
+
         font_title = load_font(36, bold=True)
         font_max_streak = load_font(50, bold=True)  # Increased weight for Max Streak
         font_data = load_font(32)  
