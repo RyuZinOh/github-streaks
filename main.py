@@ -246,26 +246,22 @@ def get_monkeytype_streak_image():
 
         draw = ImageDraw.Draw(background_img)
 
-        # Set border thickness to a smaller value
-        border_thickness = 2  # Thinner border
-
-        # Adding top and bottom borders
-        draw.rectangle([0, 0, width, border_thickness], fill="white")  # Top border
-        draw.rectangle([0, height - border_thickness, width, height], fill="white")  # Bottom border
+        border_thickness = 2
+        draw.rectangle([0, 0, width, border_thickness], fill="white")
+        draw.rectangle([0, height - border_thickness, width, height], fill="white")
 
         font_title = load_font(36, bold=True)
-        font_max_streak = load_font(50, bold=True)  # Increased weight for Max Streak
-        font_data = load_font(32)  
-        font_small = load_font(13)  # Font size reduced for "Last Active"
+        font_max_streak = load_font(50, bold=True)
+        font_data = load_font(32)
+        font_small = load_font(13)
 
-        draw.text((20, 10), "Safal's MonkeyType Streak", font=font_title, fill="white")  # Shifted more to top-left
+        draw.text((20, 10), "Safal's MonkeyType Streak", font=font_title, fill="white")
 
-        # Adjusted the position and made Max Streak bold with larger font
         text_y_position = 130
-        draw.text((20, text_y_position), "Max", font=font_max_streak, fill="white")  # Bold and bigger font
-        draw.text((20, text_y_position + 60), f"{max_streak} Days", font=font_data, fill="white")  # Placing the number of days below
+        draw.text((20, text_y_position), "Max", font=font_max_streak, fill="white")
+        draw.text((20, text_y_position + 60), f"{max_streak} Days", font=font_data, fill="white")
 
-        text_y_position += 150 
+        text_y_position += 150
 
         streak_text = f"{streak_length}\nDays"
         bbox = draw.textbbox((0, 0), streak_text, font=font_title)
@@ -279,10 +275,10 @@ def get_monkeytype_streak_image():
 
         draw.text((square_x + (square_size - text_width) // 2, square_y + (square_size - text_height) // 2), streak_text, font=font_title, fill="white")
 
-        draw.text((width - 200, height - 25), f"Last Active: {last_active}", font=font_small, fill="white")  # Moved left and at the absolute bottom
+        draw.text((width - 200, height - 25), f"Last Active: {last_active}", font=font_small, fill="white")
 
         img_io = BytesIO()
-        background_img.save(img_io, "PNG")
+        background_img.save(img_io, "PNG", quality=95)
         img_io.seek(0)
         return StreamingResponse(img_io, media_type="image/png", headers={"Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate"})
 
