@@ -5,4 +5,4 @@ Welcome to the GitHub Streak Tracker! This tool helps you visualize your GitHub 
 ![Sample Timestamp GitHub Streak](user-perspective/src/assets/response.png)
 
 
-[Documentation](https://github-streaks-dusky.vercel.app/)
+[Documentation](https://gitstreakx.vercel.app/)
