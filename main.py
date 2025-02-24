@@ -102,17 +102,37 @@ def get_github_streak(username: str):
     }
 
 
-
-
-
-
-
 @app.get("/streak/{username}/image")
 def get_streak_image(username: str):
     if username != "ryuzinoh":
         dwg = svgwrite.Drawing(profile='full', size=(600, 350))
-        dwg.add(dwg.text("Bruh, thought you could sneak in?\nUse the provided source code and\nhost it yourself!\nxD",
-                         insert=(40, 140), font_size="22px", fill="black"))
+        dwg.add(dwg.rect(insert=(0, 0), size=(600, 350), fill="none"))
+        dwg.add(dwg.rect(insert=(20, 25), size=(550, 300), fill="#1e1e1e", rx=30, ry=30))
+        
+        sneaky_message = [
+            "Bruh, thought you could sneak in?",
+            "Use the provided source code and",
+            "host it yourself!",
+            "xD"
+        ]
+        
+        text = dwg.text(
+            "",
+            insert=(50, 140),
+            font_size="22px",
+            fill="white",
+            font_weight="bold",
+            style="font-family: 'Poppins', sans-serif;",
+            text_anchor="start",
+            dominant_baseline="middle"
+        )
+        
+        line_height = 30
+        for i, line in enumerate(sneaky_message):
+            text.add(dwg.tspan(line, x=[50], dy=[line_height if i > 0 else 0]))
+        
+        dwg.add(text)
+        dwg.add(dwg.rect(insert=(20, 25), size=(550, 300), fill="none", stroke="#FF5555", stroke_width=5, rx=30, ry=30))
         
         svg_output = BytesIO(dwg.tostring().encode('utf-8'))
         return StreamingResponse(svg_output, media_type="image/svg+xml")
@@ -129,73 +149,48 @@ def get_streak_image(username: str):
         year_progress_percentage = round(year_progress * 100, 2)
         
         dwg = svgwrite.Drawing(profile='full', size=(600, 350))
-        
-        dwg.add(dwg.rect(insert=(0, 0), size=(600, 350), fill="black"))
-        dwg.add(dwg.rect(insert=(40, 40), size=(520, 270), fill="black", rx=25, ry=25))
+        dwg.add(dwg.rect(insert=(0, 0), size=(600, 350), fill="none"))
+        dwg.add(dwg.rect(insert=(20, 25), size=(550, 300), fill="#1e1e1e", rx=30, ry=30))
         
         avatar_url = f"https://github.com/{username}.png"
         response = requests.get(avatar_url)
-        if response.status_code == 200:
-            avatar_base64 = b64encode(response.content).decode("utf-8")
-            avatar_data_url = f"data:image/png;base64,{avatar_base64}"
-        else:
-            avatar_data_url = "https://via.placeholder.com/60"
+        avatar_data_url = f"data:image/png;base64,{b64encode(response.content).decode('utf-8')}" if response.status_code == 200 else "https://via.placeholder.com/60"
         
         clip_path = dwg.defs.add(dwg.clipPath(id="avatarClip"))
         clip_path.add(dwg.circle(center=(65, 65), r=30))
-        
         dwg.add(dwg.image(avatar_data_url, insert=(35, 35), size=(60, 60), clip_path="url(#avatarClip)"))
         
-        username_label = dwg.text(f"@{username}", insert=(110, 80), font_size="24px", font_weight="bold", fill="white", style="font-family: 'Poppins', sans-serif;")
-        username_label.add(dwg.animate(attributeName="opacity", from_="0", to="1", dur="1s", begin="0s", fill="freeze"))
-        dwg.add(username_label)
-        
-        current_date_text = today.strftime("%B %d, %Y")
-        current_date_label = dwg.text(current_date_text, insert=(50, 180), font_size="28px", font_weight="bold", fill="white", style="font-family: 'Poppins', sans-serif;")
-        current_date_label.add(dwg.animate(attributeName="opacity", from_="0", to="1", dur="1s", begin="0.25s", fill="freeze"))
-        dwg.add(current_date_label)
-        
-        contributions_text = f"Total Contributions: {total_contributions}"
-        contributions_label = dwg.text(contributions_text, insert=(50, 220), font_size="20px", fill="white", style="font-family: 'Poppins', sans-serif;")
-        contributions_label.add(dwg.animate(attributeName="opacity", from_="0", to="1", dur="1s", begin="0.5s", fill="freeze"))
-        dwg.add(contributions_label)
-        
-        streak_info_text = f"Current Streak: {current_streak} days"
-        streak_info_label = dwg.text(streak_info_text, insert=(50, 250), font_size="20px", fill="white", style="font-family: 'Poppins', sans-serif;")
-        streak_info_label.add(dwg.animate(attributeName="opacity", from_="0", to="1", dur="1s", begin="0.75s", fill="freeze"))
-        dwg.add(streak_info_label)
+        dwg.add(dwg.text(f"@{username}", insert=(110, 80), font_size="24px", font_weight="bold", fill="white", style="font-family: 'Poppins', sans-serif;"))
+        dwg.add(dwg.text(today.strftime("%B %d, %Y"), insert=(50, 150), font_size="40px", font_weight="bold", fill="white", style="font-family: 'Poppins', sans-serif;"))
+        dwg.add(dwg.text(f"Total Contributions: {total_contributions}", insert=(50, 220), font_size="20px", fill="white", style="font-family: 'Poppins', sans-serif;"))
+        dwg.add(dwg.text(f"Current Streak: {current_streak} days", insert=(50, 250), font_size="20px", fill="white", style="font-family: 'Poppins', sans-serif;"))
         
         circle_center = (500, 150)
         circle_radius = 60
         dwg.add(dwg.circle(center=circle_center, r=circle_radius, fill="white"))
-
-        streak_text = f"{current_streak}"
-        streak_text_element = dwg.text(streak_text, insert=(circle_center[0] - 15, circle_center[1] + 10), font_size="30px", font_weight="bold", fill="black", style="font-family: 'Poppins', sans-serif;")
-        streak_text_element.add(dwg.animate(attributeName="opacity", from_="0", to="1", dur="1s", begin="0s", fill="freeze"))
-        streak_text_element.add(dwg.animate(attributeName="y", from_="{circle_center[1] + 50}", to_="{circle_center[1] + 10}", dur="1s", begin="0s", fill="freeze"))
-        dwg.add(streak_text_element)
-
-        days_text_element = dwg.text("days", insert=(circle_center[0] - 24, circle_center[1] + 40), font_size="18px", font_weight="normal", fill="black", style="font-family: 'Poppins', sans-serif;")
-        days_text_element.add(dwg.animate(attributeName="opacity", from_="0", to="1", dur="1s", begin="0.5s", fill="freeze"))
-        dwg.add(days_text_element)
+        dwg.add(dwg.text(f"{current_streak}", insert=(circle_center[0] - 15, circle_center[1] + 10), font_size="30px", font_weight="bold", fill="black", style="font-family: 'Poppins', sans-serif;"))
+        dwg.add(dwg.text("days", insert=(circle_center[0] - 24, circle_center[1] + 40), font_size="18px", font_weight="normal", fill="black", style="font-family: 'Poppins', sans-serif;"))
         
         progress_bar_width = 400
         progress_bar_height = 15
         progress_bar_x = 50
-        progress_bar_y = 320
+        progress_bar_y = 290
         
         dwg.add(dwg.rect(insert=(progress_bar_x, progress_bar_y), size=(progress_bar_width, progress_bar_height), fill="#444", rx=7, ry=7))
         
-        progress_filled_width = (year_progress_percentage / 100) * progress_bar_width
+        progress_filled_width = year_progress_percentage / 100 * progress_bar_width
         progress_filler = dwg.rect(insert=(progress_bar_x, progress_bar_y), size=(0, progress_bar_height), fill="#00FF00", rx=7, ry=7)
-        
-        progress_filler.add(dwg.animate(attributeName="width", from_="0", to=f"{progress_filled_width}", dur="1.5s", begin="1s", fill="freeze"))
+        progress_filler.add(dwg.animate(
+            attributeName="width",
+            from_="0",
+            to=f"{progress_filled_width}",
+            dur="1.5s",
+            begin="0.5s",
+            fill="freeze"
+        ))
         dwg.add(progress_filler)
         
-        progress_text = f"{year_progress_percentage}% of {today.year} completed"
-        progress_text_element = dwg.text(progress_text, insert=(progress_bar_x, progress_bar_y - 10), font_size="16px", fill="white", style="font-family: 'Poppins', sans-serif;")
-        progress_text_element.add(dwg.animate(attributeName="opacity", from_="0", to="1", dur="1s", begin="1s", fill="freeze"))
-        dwg.add(progress_text_element)
+        dwg.add(dwg.text(f"{year_progress_percentage}% of {today.year} completed", insert=(progress_bar_x, progress_bar_y - 10), font_size="16px", fill="white", style="font-family: 'Poppins', sans-serif;"))
         
     except Exception as e:
         raise HTTPException(status_code=404, detail=f"Error generating streak image: {str(e)}")
