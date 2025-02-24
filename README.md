@@ -2,7 +2,8 @@
 Welcome to the GitHub Streak Tracker! This tool helps you visualize your GitHub activity streaks and add them to your profile README.
  
 # this is how it it would look like?
-![{F80ADD8A-D5E9-4F58-A321-B2B513318F21}](https://github.com/user-attachments/assets/761ef7ea-4700-4a09-93f5-76a77c0e9994)
+![response](https://github.com/user-attachments/assets/5f6b5748-1fa2-4d84-b28c-e858b6cf5e0a)
+
 <hr>
 
 [Documentation](https://gitstreakx.vercel.app/)
