@@ -1,18 +1,16 @@
-from datetime import datetime, timezone
+from datetime import datetime
+from io import BytesIO
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import requests
 import os
 from dotenv import load_dotenv
+import svgwrite
+from datetime import datetime
 from fastapi.responses import StreamingResponse
-from PIL import Image, ImageDraw, ImageFont
-from io import BytesIO
-from fastapi.responses import StreamingResponse
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 load_dotenv()
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
-# APE_KEY = os.getenv("APE_KEY")
 
 app = FastAPI()
 
@@ -25,14 +23,6 @@ app.add_middleware(
 )
 
 GITHUB_GRAPHQL_URL = "https://api.github.com/graphql"
-# MONKEYTYPE_URL = "https://api.monkeytype.com/users/streak"
-
-def load_font(size: int, bold=False):
-    font_path = "assets/Poppins-Bold.ttf" if bold else "assets/Poppins-Regular.ttf"
-    try:
-        return ImageFont.truetype(font_path, size)
-    except IOError:
-        return ImageFont.load_default()
 
 @app.get("/")
 def home():
@@ -111,175 +101,109 @@ def get_github_streak(username: str):
 
 
 
-def make_avatar_circular(avatar_img):
-    size = min(avatar_img.size)
-    mask = Image.new("L", (size, size), 0)
-    draw = ImageDraw.Draw(mask)
-    draw.ellipse((0, 0, size, size), fill=255)
-    mask = mask.resize(avatar_img.size, Image.Resampling.LANCZOS)
-    avatar_img.putalpha(mask)
-    return avatar_img
 
-def fetch_github_avatar(username: str):
-    url = f"https://github.com/{username}.png"
-    response = requests.get(url)
-    if response.status_code != 200:
-        raise HTTPException(status_code=404, detail="GitHub user not found")
-    return Image.open(BytesIO(response.content))
 
 @app.get("/streak/{username}/image")
 def get_streak_image(username: str):
     if username != "ryuzinoh":
-        background_img = Image.new("RGBA", (900, 550), (255, 255, 255))  # Reduced height
-        draw = ImageDraw.Draw(background_img)
-        font_small = load_font(22)
-        message = "Bruh, thought you could sneak in? \n Use the provided source code and \nhost it yourself! \n xD"
-        draw.text((40, 240), message, font=font_small, fill="#000000")
-        img_io = BytesIO()
-        background_img.save(img_io, "PNG")
-        img_io.seek(0)
-        return StreamingResponse(img_io, media_type="image/png")
+        dwg = svgwrite.Drawing(profile='full', size=(600, 350))
+        dwg.add(dwg.text("Bruh, thought you could sneak in?\nUse the provided source code and\nhost it yourself!\nxD",
+                         insert=(40, 140), font_size="22px", fill="black"))
+        
+        svg_output = BytesIO(dwg.tostring().encode('utf-8'))
+        return StreamingResponse(svg_output, media_type="image/svg+xml")
     
     try:
         streak_data = get_github_streak(username)
         current_streak = streak_data["streak_days_from_2024_to_today"]
         total_contributions = streak_data["total_contributions"]
         
-        background_img = Image.new("RGBA", (900, 475), (255, 255, 255))  # Reduced height
-        draw = ImageDraw.Draw(background_img)
+        today = datetime.today()
+        start_of_year = datetime(today.year, 1, 1)
+        end_of_year = datetime(today.year + 1, 1, 1)
+        year_progress = (today - start_of_year).days / (end_of_year - start_of_year).days
+        year_progress_percentage = round(year_progress * 100, 2)
         
-        title_color = "#000000"
-        streak_color = "#000000"
-        text_color = "#000000"
-        year_color = "#000000"
+        dwg = svgwrite.Drawing(profile='full', size=(600, 350))
         
-        font_big = load_font(40, bold=True)
-        font_small = load_font(28)
-        font_streak = load_font(60, bold=True)
-        font_year = load_font(70, bold=True)
-        font_year_maxxr = load_font(120, bold=True)
-
-        draw.text((10, 0), f"{username}'s GitHub Streak", font=font_big, fill=title_color)
+        # Black background color
+        dwg.add(dwg.rect(insert=(0, 0), size=(600, 350), fill="black"))
         
-        draw.rectangle([40, 80, 220, 300], outline=streak_color, width=3)
-        draw.text((90, 120), f"{current_streak}", font=font_streak, fill=streak_color)
-        draw.text((90, 190), "days", font=font_small, fill=text_color)
-        draw.text((40, 430), f"Total Contributions: {total_contributions}", font=font_small, fill=text_color)
+        # Adding a rounded card without any border
+        dwg.add(dwg.rect(insert=(40, 40), size=(520, 270), fill="black", rx=25, ry=25))
         
-        streak_percentage = (current_streak / 365) * 100
-        draw.rectangle([(40, 320), (840, 350)], outline=streak_color, width=3)
-        for i in range(int(800 * streak_percentage / 100)):
-            draw.line([(40 + i, 320), (40 + i, 350)], fill=streak_color)
-        draw.text((40, 360), f"{streak_percentage:.2f}% of this year", font=font_small, fill=text_color)
+        # Adding profile picture (circular) inside the card
+        clip_path = dwg.defs.add(dwg.clipPath(id="avatarClip"))
+        clip_path.add(dwg.circle(center=(65, 65), r=30))
         
-        today = datetime.now().strftime("%B %d, %Y")
-        draw.text((40, 390), f"Today's Date: {today}", font=font_small, fill=text_color)
+        # Add the image with the clipPath applied
+        dwg.add(dwg.image("https://github.com/ryuzinoh.png", insert=(35, 35), size=(60, 60), clip_path="url(#avatarClip)"))
         
-        avatar_img = fetch_github_avatar(username)
-        avatar_img = avatar_img.resize((150, 150), Image.Resampling.LANCZOS)
-        avatar_img = avatar_img.convert("RGBA")
-        avatar_img = make_avatar_circular(avatar_img)
+        # Add username label with fade-in animation
+        username_label = dwg.text(f"@{username}", insert=(110, 80), font_size="24px", font_weight="bold", fill="white", style="font-family: 'Poppins', sans-serif;")
+        username_label.add(dwg.animate(attributeName="opacity", from_="0", to="1", dur="1s", begin="0s", fill="freeze"))
+        dwg.add(username_label)
         
-        background_img.paste(avatar_img, (730, 40), avatar_img)
+        # Add current elapsed date in big text above total contributions
+        current_date_text = today.strftime("%B %d, %Y")  # Format: February 24, 2024
+        current_date_label = dwg.text(current_date_text, insert=(50, 180), font_size="28px", font_weight="bold", fill="white", style="font-family: 'Poppins', sans-serif;")
+        current_date_label.add(dwg.animate(attributeName="opacity", from_="0", to="1", dur="1s", begin="0.25s", fill="freeze"))
+        dwg.add(current_date_label)
         
-        draw.text((450, 180), str(datetime.now().year), font=font_year_maxxr, fill=year_color)  # Moved the year down
-        draw.rectangle([0, 0, 899, 474], outline="black", width=5)
-
-    except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="Avatar image not found")
-    
-    img_io = BytesIO()
-    background_img.save(img_io, "PNG")
-    img_io.seek(0)
-    return StreamingResponse(img_io, media_type="image/png", headers={"Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate"})
-
-
-
-
-
-
-# #for monkeytype streak
-
-# def fetch_monkeytype_streak():
-#     if not APE_KEY:
-#         raise HTTPException(status_code=500, detail="MonkeyType API Key is missing!")
-    
-#     headers = {"Authorization": f"ApeKey {APE_KEY}"}
-#     response = requests.get(MONKEYTYPE_URL, headers=headers)
-    
-#     if response.status_code != 200:
-#         raise HTTPException(status_code=500, detail="Error fetching data from MonkeyType")
-    
-#     return response.json()
-
-# @app.get("/monkeytype/streak")
-# def get_monkeytype_streak():
-#     data = fetch_monkeytype_streak()
-#     if "data" not in data:
-#         raise HTTPException(status_code=404, detail="Streak data not found")
-    
-#     streak_data = data["data"]
-#     streak_length = streak_data.get("length", 0)
-#     max_streak = streak_data.get("maxLength", 0)
-#     last_timestamp = streak_data.get("lastResultTimestamp", 0)
-#     last_date = datetime.fromtimestamp(last_timestamp / 1000, tz=timezone.utc).strftime("%B %d, %Y")
-    
-#     return {
-#         "streak_length": streak_length,
-#         "max_streak": max_streak,
-#         "last_active": last_date
-#     }
-    
-# @app.get("/monkeytype/streak/image")
-# def get_monkeytype_streak_image():
-#     try:
-#         streak_data = get_monkeytype_streak()
-#         streak_length = streak_data["streak_length"]
-#         max_streak = streak_data["max_streak"]
-#         last_active = streak_data["last_active"]
-
-#         width, height = 600, 300
-
-#         # Create a white background
-#         background_img = Image.new("RGB", (width, height), "white")
+        # Add total contributions information below the current date
+        contributions_text = f"Total Contributions: {total_contributions}"
+        contributions_label = dwg.text(contributions_text, insert=(50, 220), font_size="20px", fill="white", style="font-family: 'Poppins', sans-serif;")
+        contributions_label.add(dwg.animate(attributeName="opacity", from_="0", to="1", dur="1s", begin="0.5s", fill="freeze"))
+        dwg.add(contributions_label)
         
-#         # Create black top and bottom bars
-#         draw = ImageDraw.Draw(background_img)
-#         border_thickness = 2
-#         draw.rectangle([0, 0, width, border_thickness], fill="black")
-#         draw.rectangle([0, height - border_thickness, width, height], fill="black")
+        # Add current streak information below total contributions
+        streak_info_text = f"Current Streak: {current_streak} days"
+        streak_info_label = dwg.text(streak_info_text, insert=(50, 250), font_size="20px", fill="white", style="font-family: 'Poppins', sans-serif;")
+        streak_info_label.add(dwg.animate(attributeName="opacity", from_="0", to="1", dur="1s", begin="0.75s", fill="freeze"))
+        dwg.add(streak_info_label)
+        
+        # Add a larger circle showing streak in bold, positioned perfectly
+        circle_center = (500, 150)
+        circle_radius = 60
+        dwg.add(dwg.circle(center=circle_center, r=circle_radius, fill="white"))  # Larger white circle
 
-#         font_title = load_font(36, bold=True)
-#         font_max_streak = load_font(50, bold=True)
-#         font_data = load_font(32)
-#         font_small = load_font(13)
+        # Text for streak days centered in the circle with fade-in and slide-up animation
+        streak_text = f"{current_streak}"
+        streak_text_element = dwg.text(streak_text, insert=(circle_center[0] - 15, circle_center[1] + 10), font_size="30px", font_weight="bold", fill="black", style="font-family: 'Poppins', sans-serif;")
+        streak_text_element.add(dwg.animate(attributeName="opacity", from_="0", to="1", dur="1s", begin="0s", fill="freeze"))
+        streak_text_element.add(dwg.animate(attributeName="y", from_="{circle_center[1] + 50}", to_="{circle_center[1] + 10}", dur="1s", begin="0s", fill="freeze"))
+        dwg.add(streak_text_element)
 
-#         draw.text((20, 10), "My MonkeyType Streak", font=font_title, fill="black")
+        # Text for "days" centered below the number with fade-in animation
+        days_text_element = dwg.text("days", insert=(circle_center[0] - 24, circle_center[1] + 40), font_size="18px", font_weight="normal", fill="black", style="font-family: 'Poppins', sans-serif;")
+        days_text_element.add(dwg.animate(attributeName="opacity", from_="0", to="1", dur="1s", begin="0.5s", fill="freeze"))
+        dwg.add(days_text_element)
+        
+        # Add progress bar for contributions in perspective to this year
+        progress_bar_width = 400
+        progress_bar_height = 15
+        progress_bar_x = 50
+        progress_bar_y = 320
+        
+        # Background of the progress bar
+        dwg.add(dwg.rect(insert=(progress_bar_x, progress_bar_y), size=(progress_bar_width, progress_bar_height), fill="#444", rx=7, ry=7))
+        
+        # Foreground of the progress bar (percentage filled)
+        progress_filled_width = (year_progress_percentage / 100) * progress_bar_width
+        progress_filler = dwg.rect(insert=(progress_bar_x, progress_bar_y), size=(0, progress_bar_height), fill="#00FF00", rx=7, ry=7)
+        
+        # Animate the green filler to grow from left to right
+        progress_filler.add(dwg.animate(attributeName="width", from_="0", to=f"{progress_filled_width}", dur="1.5s", begin="1s", fill="freeze"))
+        dwg.add(progress_filler)
+        
+        # Add text showing the percentage and current year
+        progress_text = f"{year_progress_percentage}% of {today.year} completed"
+        progress_text_element = dwg.text(progress_text, insert=(progress_bar_x, progress_bar_y - 10), font_size="16px", fill="white", style="font-family: 'Poppins', sans-serif;")
+        progress_text_element.add(dwg.animate(attributeName="opacity", from_="0", to="1", dur="1s", begin="1s", fill="freeze"))
+        dwg.add(progress_text_element)
+        
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f"Error generating streak image: {str(e)}")
 
-#         text_y_position = 130
-#         draw.text((20, text_y_position), "Max", font=font_max_streak, fill="black")
-#         draw.text((20, text_y_position + 60), f"{max_streak} Days", font=font_data, fill="black")
-
-#         text_y_position += 150
-
-#         streak_text = f"{streak_length}\nDays"
-#         bbox = draw.textbbox((0, 0), streak_text, font=font_title)
-#         text_width = bbox[2] - bbox[0]
-#         text_height = bbox[3] - bbox[1]
-
-#         square_size = max(120, text_width + 30)
-#         square_x = width - square_size - 20
-#         square_y = 80
-#         draw.rectangle([square_x, square_y, square_x + square_size, square_y + square_size], outline="black", width=4)
-
-#         draw.text((square_x + (square_size - text_width) // 2, square_y + (square_size - text_height) // 2), streak_text, font=font_title, fill="black")
-
-#         draw.text((width - 200, height - 25), f"Last Active: {last_active}", font=font_small, fill="black")
-
-#         img_io = BytesIO()
-#         background_img.save(img_io, "PNG", quality=95)
-#         img_io.seek(0)
-#         return StreamingResponse(img_io, media_type="image/png", headers={"Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate"})
-
-#     except FileNotFoundError:
-#         raise HTTPException(status_code=404, detail="Error generating streak image")
+    svg_output = BytesIO(dwg.tostring().encode('utf-8'))
+    return StreamingResponse(svg_output, media_type="image/svg+xml")
