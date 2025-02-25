@@ -15,8 +15,8 @@ themes = {
         name="midnight",
         background_color="#1e1e1e",
         text_color="#ffffff",
-        progress_bar_color="#00FF00",
-        circle_fill_color="#ffffff",
+        progress_bar_color="#5e17eb",
+        circle_fill_color="#5e17eb",
         circle_text_color="#000000"
     ),
     "sunset": Theme(
