@@ -7,9 +7,9 @@ import os
 from dotenv import load_dotenv
 import svgwrite
 from fastapi.responses import StreamingResponse
-from datetime import datetime
 import requests
 from base64 import b64encode
+from datetime import datetime, timedelta
 from theme import get_theme
 
 load_dotenv()
@@ -60,6 +60,8 @@ def fetch_github_data(username: str):
     
     return response.json()
 
+
+
 @app.get("/streak/{username}")
 def get_github_streak(username: str):
     data = fetch_github_data(username)
@@ -75,41 +77,44 @@ def get_github_streak(username: str):
             day_date = datetime.strptime(day["date"], "%Y-%m-%d")
             all_contributions.append({"date": day_date, "contributions_count": day["contributionCount"]})
     
-    all_contributions.sort(key=lambda x: x["date"], reverse=True)
-    contributions_from_2024 = [entry for entry in all_contributions if entry["date"].year >= 2024]
+    all_contributions.sort(key=lambda x: x["date"])
     
-    current_streak, ongoing_streak, total_contributions = 0, 0, 0
-    previous_day = None
+    max_streak = 0
+    ongoing_streak = 0
+    previous_day_contributions = 0
     
-    for day in contributions_from_2024:
-        total_contributions += day["contributions_count"]
-        if day["contributions_count"] > 0:
-            if previous_day is None or (previous_day - day["date"]).days == 1:
-                ongoing_streak += 1
-            else:
-                current_streak = max(current_streak, ongoing_streak)
+    now = datetime.now()
+    today = now.date()
+    end_of_today = datetime.combine(today, datetime.max.time())
+    
+    for day in all_contributions:
+        day_date = day["date"]
+        contributions_count = day["contributions_count"]
+        
+        is_current_day = day_date.date() == today
+        is_day_ongoing = is_current_day and now < end_of_today
+        
+        if contributions_count > 0:
+            if previous_day_contributions == 0:
                 ongoing_streak = 1
+            else:
+                ongoing_streak += 1
+            max_streak = max(max_streak, ongoing_streak)
         else:
-            current_streak = max(current_streak, ongoing_streak)
-            ongoing_streak = 0
-        previous_day = day["date"]
-    
-    current_streak = max(current_streak, ongoing_streak)
+            if not is_day_ongoing:
+                ongoing_streak = 0
+        
+        previous_day_contributions = contributions_count
     
     return {
         "username": username,
-        "streak_days_from_2024_to_today": current_streak,
-        "total_contributions": total_contributions
+        "max_streak": max_streak,
+        "ongoing_streak": ongoing_streak,
+        "total_contributions": sum(day["contributions_count"] for day in all_contributions)
     }
 
-
-
-
-
-
-
 @app.get("/streak/{username}/image")
-def get_streak_image(username: str, theme: str = "midnight"):
+def get_streak_image(username: str, theme: str = "dark_knight"):
     if username != "ryuzinoh":
         dwg = svgwrite.Drawing(profile='full', size=(600, 350))
         dwg.add(dwg.rect(insert=(0, 0), size=(600, 350), fill="none"))
@@ -144,11 +149,11 @@ def get_streak_image(username: str, theme: str = "midnight"):
         return StreamingResponse(svg_output, media_type="image/svg+xml")
     
     try:
-        # Get the selected theme
         selected_theme = get_theme(theme)
         
         streak_data = get_github_streak(username)
-        current_streak = streak_data["streak_days_from_2024_to_today"]
+        max_streak = streak_data["max_streak"]
+        ongoing_streak = streak_data["ongoing_streak"]
         total_contributions = streak_data["total_contributions"]
         
         today = datetime.today()
@@ -172,12 +177,12 @@ def get_streak_image(username: str, theme: str = "midnight"):
         dwg.add(dwg.text(f"@{username}", insert=(110, 80), font_size="24px", font_weight="bold", fill=selected_theme.text_color, style="font-family: 'Poppins', sans-serif;"))
         dwg.add(dwg.text(today.strftime("%B %d, %Y"), insert=(50, 150), font_size="40px", font_weight="bold", fill=selected_theme.text_color, style="font-family: 'Poppins', sans-serif;"))
         dwg.add(dwg.text(f"Total Contributions: {total_contributions}", insert=(50, 220), font_size="20px", fill=selected_theme.text_color, style="font-family: 'Poppins', sans-serif;"))
-        dwg.add(dwg.text(f"Current Streak: {current_streak} days", insert=(50, 250), font_size="20px", fill=selected_theme.text_color, style="font-family: 'Poppins', sans-serif;"))
+        dwg.add(dwg.text(f"Ongoing Streak: {ongoing_streak} days", insert=(50, 250), font_size="20px", fill=selected_theme.text_color, style="font-family: 'Poppins', sans-serif;"))
         
         circle_center = (500, 150)
         circle_radius = 60
         dwg.add(dwg.circle(center=circle_center, r=circle_radius, fill=selected_theme.circle_fill_color))
-        dwg.add(dwg.text(f"{current_streak}", insert=(circle_center[0] - 15, circle_center[1] + 10), font_size="30px", font_weight="bold", fill=selected_theme.circle_text_color, style="font-family: 'Poppins', sans-serif;"))
+        dwg.add(dwg.text(f"{max_streak}", insert=(circle_center[0] - 15, circle_center[1] + 10), font_size="30px", font_weight="bold", fill=selected_theme.circle_text_color, style="font-family: 'Poppins', sans-serif;"))
         dwg.add(dwg.text("days", insert=(circle_center[0] - 24, circle_center[1] + 40), font_size="18px", font_weight="normal", fill=selected_theme.circle_text_color, style="font-family: 'Poppins', sans-serif;"))
         
         progress_bar_width = 400
