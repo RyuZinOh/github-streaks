@@ -11,6 +11,8 @@ import requests
 from base64 import b64encode
 from datetime import datetime, timedelta
 from theme import get_theme
+import json
+
 
 load_dotenv()
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
@@ -113,18 +115,24 @@ def get_github_streak(username: str):
         "total_contributions": sum(day["contributions_count"] for day in all_contributions)
     }
 
+
+# read allowed.json
+with open("allowed.json", "r") as file:
+    allowed_usernames = json.load(file)
+
 @app.get("/streak/{username}/image")
 def get_streak_image(username: str, theme: str = "dark_knight"):
-    if username != "ryuzinoh":
+    # Check if the username is in the allowed list
+    if username not in allowed_usernames:
         dwg = svgwrite.Drawing(profile='full', size=(600, 350))
         dwg.add(dwg.rect(insert=(0, 0), size=(600, 350), fill="none"))
         dwg.add(dwg.rect(insert=(20, 25), size=(550, 300), fill="#1e1e1e", rx=30, ry=30))
         
-        sneaky_message = [
-            "Bruh, thought you could sneak in?",
-            "Use the provided source code and",
-            "host it yourself!",
-            "xD"
+        access_denied_message = [
+            "Access Denied",
+            "You are not authorized to use this route.",
+            "Please contact the administrator if you believe",
+            "this is a mistake."
         ]
         
         text = dwg.text(
@@ -139,7 +147,7 @@ def get_streak_image(username: str, theme: str = "dark_knight"):
         )
         
         line_height = 30
-        for i, line in enumerate(sneaky_message):
+        for i, line in enumerate(access_denied_message):
             text.add(dwg.tspan(line, x=[50], dy=[line_height if i > 0 else 0]))
         
         dwg.add(text)
