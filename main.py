@@ -120,6 +120,9 @@ def get_github_streak(username: str):
 with open("allowed.json", "r") as file:
     allowed_usernames = json.load(file)
 
+
+allowed_usernames = [username.lower() for username in allowed_usernames]    
+
 @app.get("/streak/{username}/image")
 def get_streak_image(username: str, theme: str = "dark_knight"):
     # Check if the username is in the allowed list
