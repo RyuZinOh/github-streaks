@@ -106,7 +106,17 @@ themes = {
         progress_bar_color="#FF4500",
         circle_fill_color="#DC143C",
         circle_text_color="#000000"
-    )
+    ),
+    "goldenshade": Theme(
+        name="goldenshade",
+        background_color="#FFF5CC",
+        text_color="#1F1A17",
+        progress_bar_color="#FFD700",
+        circle_fill_color="#FFC107",
+        circle_text_color="#1F1A17"
+    ),
+
+
 }
 
 def get_theme(theme_name: str):

@@ -124,7 +124,7 @@ with open("allowed.json", "r") as file:
 allowed_usernames = [username.lower() for username in allowed_usernames]    
 
 @app.get("/streak/{username}/image")
-def get_streak_image(username: str, theme: str = "dark_knight"):
+def get_streak_image(username: str, theme: str = "goldenshade"):
     # Check if the username is in the allowed list
     if username not in allowed_usernames:
         dwg = svgwrite.Drawing(profile='full', size=(600, 350))
