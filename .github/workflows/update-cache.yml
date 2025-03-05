@@ -16,14 +16,19 @@ jobs:
         id: cache_bust
         run: echo "timestamp=$(date +%s)" >> $GITHUB_ENV
 
-      - name: Update README
+      - name: Randomize Username and Update README
         run: |
-          sed -i "s/cache-bust=[0-9]*/cache-bust=${{ env.timestamp }}/g" README.md
+          # Randomly choose between 'happilli' and 'ryuzinoh'
+          USERNAME=$(shuf -e happilli ryuzinoh -n 1)
+          # Replace 'cache-bust' value and username in README.md
+          sed -i "s/cache-bust=[0-9]\+/cache-bust=${{ env.timestamp }}/g" README.md
+          sed -i "s/ryuzinoh/${USERNAME}/g" README.md
+          sed -i "s/happilli/${USERNAME}/g" README.md
 
       - name: Commit and Push Changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add README.md
-          git commit -m "Update cache-bust timestamp: ${{ env.timestamp }}" || echo "No changes to commit"
+          git commit -m "Update cache-bust timestamp and username: ${{ env.timestamp }}" || echo "No changes to commit"
           git push
