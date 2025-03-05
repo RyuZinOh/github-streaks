@@ -123,6 +123,9 @@ with open("allowed.json", "r") as file:
 
 allowed_usernames = [username.lower() for username in allowed_usernames]    
 
+
+CROWN_SVG_PATH = "assets/crown.svg"
+
 @app.get("/streak/{username}/image")
 def get_streak_image(username: str, theme: str = "goldenshade"):
     # Check if the username is in the allowed list
@@ -195,6 +198,12 @@ def get_streak_image(username: str, theme: str = "goldenshade"):
         dwg.add(dwg.circle(center=circle_center, r=circle_radius, fill=selected_theme.circle_fill_color))
         dwg.add(dwg.text(f"{max_streak}", insert=(circle_center[0] - 15, circle_center[1] + 10), font_size="30px", font_weight="bold", fill=selected_theme.circle_text_color, style="font-family: 'Poppins', sans-serif;"))
         dwg.add(dwg.text("days", insert=(circle_center[0] - 24, circle_center[1] + 40), font_size="18px", font_weight="normal", fill=selected_theme.circle_text_color, style="font-family: 'Poppins', sans-serif;"))
+        
+        # Add crown SVG above the max streak circle
+        if os.path.exists(CROWN_SVG_PATH):
+            with open(CROWN_SVG_PATH, "r") as crown_file:
+                crown_svg = crown_file.read()
+                dwg.add(dwg.image(href=f"data:image/svg+xml;base64,{b64encode(crown_svg.encode('utf-8')).decode('utf-8')}", insert=(circle_center[0] - 33, circle_center[1] - 100), size=(69, 69)))
         
         progress_bar_width = 400
         progress_bar_height = 15
