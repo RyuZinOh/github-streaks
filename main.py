@@ -196,8 +196,9 @@ def get_streak_image(username: str, theme: str = "goldenshade"):
         circle_center = (500, 150)
         circle_radius = 60
         dwg.add(dwg.circle(center=circle_center, r=circle_radius, fill=selected_theme.circle_fill_color))
-        dwg.add(dwg.text(f"{max_streak}", insert=(circle_center[0] - 15, circle_center[1] + 5), font_size="45px", font_weight="bold", fill=selected_theme.circle_text_color, style="font-family: 'Poppins', sans-serif;"))
+        dwg.add(dwg.text(f"{max_streak}", insert=(circle_center[0] - 25, circle_center[1] + 5), font_size="45px", font_weight="bold", fill=selected_theme.circle_text_color, style="font-family: 'Poppins', sans-serif;"))
         dwg.add(dwg.text("DAYS", insert=(circle_center[0] - 23, circle_center[1] + 25), font_size="18px", font_weight="bold", fill=selected_theme.circle_text_color, style="font-family: 'Poppins', sans-serif;"))
+       
         
         # Add crown SVG above the max streak circle
         if os.path.exists(CROWN_SVG_PATH):
