@@ -6,8 +6,6 @@ Welcome to the **GitHub Streak Tracker**! This tool helps you visualize your Git
 
 ### Midnight
 
-
-=======
 ![GitHub Streak - Midnight](https://github-streaks-87nn.onrender.com/streak/ryuzinoh/image?theme=midnight&cache-bust=1741443169)
 
 ### Sunset
