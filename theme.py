@@ -19,7 +19,7 @@ themes = {
         progress_bar_color="#5e17eb",
         circle_fill_color="#5e17eb",
         circle_text_color="#000000",
-        crown_theme_color="#FFD700" 
+        crown_theme_color="#5e17eb" 
     ),
     "sunset": Theme(
         name="sunset",
