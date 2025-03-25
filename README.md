@@ -13,4 +13,4 @@
 - Rose Gold
 - Golden Shade
 
-[DOCUMENTAATION](https://gitstreakx.vercel.app/)
+[DOCUMENTATION](https://gitstreakx.vercel.app/)
