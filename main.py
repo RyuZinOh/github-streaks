@@ -126,14 +126,12 @@ allowed_usernames = [username.lower() for username in allowed_usernames]
 
 CROWN_SVG_PATH = "assets/crown.svg"
 
-
 @app.get("/streak/{username}/image")
 def get_streak_image(username: str, theme: str = "goldenshade"):
     # Check if the username is in the allowed list
-    if username not in allowed_usernames:
-        dwg = svgwrite.Drawing(profile='full', size=(600, 350))
-        dwg.add(dwg.rect(insert=(0, 0), size=(600, 350), fill="none"))
-        dwg.add(dwg.rect(insert=(20, 25), size=(550, 300), fill="#1e1e1e", rx=30, ry=30))
+    if username.lower() not in allowed_usernames:
+        dwg = svgwrite.Drawing(size=("550px", "300px"), viewBox="0 0 550 300")
+        dwg.add(dwg.rect(insert=(0, 0), size=(550, 300), fill="#1e1e1e", rx=30, ry=30))
         
         access_denied_message = [
             "Access Denied",
@@ -144,7 +142,7 @@ def get_streak_image(username: str, theme: str = "goldenshade"):
         
         text = dwg.text(
             "",
-            insert=(50, 140),
+            insert=(30, 120),
             font_size="22px",
             fill="white",
             font_weight="bold",
@@ -155,10 +153,10 @@ def get_streak_image(username: str, theme: str = "goldenshade"):
         
         line_height = 30
         for i, line in enumerate(access_denied_message):
-            text.add(dwg.tspan(line, x=[50], dy=[line_height if i > 0 else 0]))
+            text.add(dwg.tspan(line, x=[30], dy=[line_height if i > 0 else 0]))
         
         dwg.add(text)
-        dwg.add(dwg.rect(insert=(20, 25), size=(550, 300), fill="none", stroke="#FF5555", stroke_width=5, rx=30, ry=30))
+        dwg.add(dwg.rect(insert=(0, 0), size=(550, 300), fill="none", stroke="#FF5555", stroke_width=5, rx=30, ry=30))
         
         svg_output = BytesIO(dwg.tostring().encode('utf-8'))
         return StreamingResponse(svg_output, media_type="image/svg+xml")
@@ -177,24 +175,23 @@ def get_streak_image(username: str, theme: str = "goldenshade"):
         year_progress = (today - start_of_year).days / (end_of_year - start_of_year).days
         year_progress_percentage = round(year_progress * 100, 2)
         
-        dwg = svgwrite.Drawing(profile='full', size=(600, 350))
-        dwg.add(dwg.rect(insert=(0, 0), size=(600, 350), fill="none"))
-        dwg.add(dwg.rect(insert=(20, 25), size=(550, 300), fill=selected_theme.background_color, rx=30, ry=30))
+        dwg = svgwrite.Drawing(size=("550px", "300px"), viewBox="0 0 550 300")
+        dwg.add(dwg.rect(insert=(0, 0), size=(550, 300), fill=selected_theme.background_color, rx=30, ry=30))
         
         avatar_url = f"https://github.com/{username}.png"
         response = requests.get(avatar_url)
         avatar_data_url = f"data:image/png;base64,{b64encode(response.content).decode('utf-8')}" if response.status_code == 200 else "https://via.placeholder.com/60"
         
         clip_path = dwg.defs.add(dwg.clipPath(id="avatarClip"))
-        clip_path.add(dwg.circle(center=(65, 65), r=30))
-        dwg.add(dwg.image(avatar_data_url, insert=(35, 35), size=(60, 60), clip_path="url(#avatarClip)"))
+        clip_path.add(dwg.circle(center=(45, 40), r=30))
+        dwg.add(dwg.image(avatar_data_url, insert=(15, 10), size=(60, 60), clip_path="url(#avatarClip)"))
         
-        dwg.add(dwg.text(f"@{username}", insert=(110, 80), font_size="24px", font_weight="bold", fill=selected_theme.text_color, style="font-family: 'Poppins', sans-serif;"))
-        dwg.add(dwg.text(today.strftime("%B %d, %Y"), insert=(50, 150), font_size="40px", font_weight="bold", fill=selected_theme.text_color, style="font-family: 'Poppins', sans-serif;"))
-        dwg.add(dwg.text(f"Total Contributions: {total_contributions}", insert=(50, 220), font_size="20px", fill=selected_theme.text_color, style="font-family: 'Poppins', sans-serif;"))
-        dwg.add(dwg.text(f"Ongoing Streak: {ongoing_streak} days", insert=(50, 250), font_size="20px", fill=selected_theme.text_color, style="font-family: 'Poppins', sans-serif;"))
+        dwg.add(dwg.text(f"@{username}", insert=(90, 55), font_size="24px", font_weight="bold", fill=selected_theme.text_color, style="font-family: 'Poppins', sans-serif;"))
+        dwg.add(dwg.text(today.strftime("%B %d, %Y"), insert=(30, 125), font_size="40px", font_weight="bold", fill=selected_theme.text_color, style="font-family: 'Poppins', sans-serif;"))
+        dwg.add(dwg.text(f"Total Contributions: {total_contributions}", insert=(30, 195), font_size="20px", fill=selected_theme.text_color, style="font-family: 'Poppins', sans-serif;"))
+        dwg.add(dwg.text(f"Ongoing Streak: {ongoing_streak} days", insert=(30, 225), font_size="20px", fill=selected_theme.text_color, style="font-family: 'Poppins', sans-serif;"))
         
-        circle_center = (500, 150)
+        circle_center = (480, 125)
         circle_radius = 60
         dwg.add(dwg.circle(center=circle_center, r=circle_radius, fill=selected_theme.circle_fill_color))
         dwg.add(dwg.text(f"{max_streak}", insert=(circle_center[0] - 25, circle_center[1] + 5), font_size="45px", font_weight="bold", fill=selected_theme.circle_text_color, style="font-family: 'Poppins', sans-serif;"))
@@ -209,8 +206,8 @@ def get_streak_image(username: str, theme: str = "goldenshade"):
         
         progress_bar_width = 400
         progress_bar_height = 15
-        progress_bar_x = 50
-        progress_bar_y = 290
+        progress_bar_x = 30
+        progress_bar_y = 265
         
         dwg.add(dwg.rect(insert=(progress_bar_x, progress_bar_y), size=(progress_bar_width, progress_bar_height), fill="#444", rx=7, ry=7))
         
