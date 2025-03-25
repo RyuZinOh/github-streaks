@@ -4,54 +4,31 @@ Track and display your GitHub contribution streaks with beautiful themes.
 
 ## Available Themes
 
-### Midnight
+### Dark Themes
 
-![GitHub Streak - Midnight](https://github-streaks-mqc9.onrender.com/streak/ryuzinoh/image?theme=midnight&cache-bust=1741206156)
+- Midnight
+- Dark Knight
+- Matrix
 
-### Sunset
+### Colorful Themes
 
-![GitHub Streak - Sunset](https://github-streaks-mqc9.onrender.com/streak/ryuzinoh/image?theme=sunset&cache-bust=1741206156)
+- Sunset
+- Ocean
+- Forest
+- Neon
+- Cyberpunk
+- Galaxy
+- Aurora
+- Lava
 
-### Ocean
+### Metallic/Shimmer Themes
 
-![GitHub Streak - Ocean](https://github-streaks-mqc9.onrender.com/streak/ryuzinoh/image?theme=ocean&cache-bust=1741206156)
+- Rose Gold
+- Golden Shade
 
-### Forest
+## Usage
 
-![GitHub Streak - Forest](https://github-streaks-mqc9.onrender.com/streak/ryuzinoh/image?theme=forest&cache-bust=1741206156)
+Simply use the URL format:  
+`hosted_url_end/streak/USERNAME/image?theme=THEME_NAME`
 
-### Neon
-
-![GitHub Streak - Neon](https://github-streaks-mqc9.onrender.com/streak/ryuzinoh/image?theme=neon&cache-bust=1741206156)
-
-### Cyberpunk
-
-![GitHub Streak - Cyberpunk](https://github-streaks-mqc9.onrender.com/streak/ryuzinoh/image?theme=cyberpunk&cache-bust=1741206156)
-
-### Galaxy
-
-![GitHub Streak - Galaxy](https://github-streaks-mqc9.onrender.com/streak/ryuzinoh/image?theme=galaxy&cache-bust=1741206156)
-
-### Matrix
-
-![GitHub Streak - Matrix](https://github-streaks-mqc9.onrender.com/streak/ryuzinoh/image?theme=matrix&cache-bust=1741206156)
-
-### Rose Gold
-
-![GitHub Streak - Rose Gold](https://github-streaks-mqc9.onrender.com/streak/ryuzinoh/image?theme=rose_gold&cache-bust=1741206156)
-
-### Dark Knight
-
-![GitHub Streak - Dark Knight](https://github-streaks-mqc9.onrender.com/streak/ryuzinoh/image?theme=dark_knight&cache-bust=1741206156)
-
-### Aurora
-
-![GitHub Streak - Aurora](https://github-streaks-mqc9.onrender.com/streak/ryuzinoh/image?theme=aurora&cache-bust=1741206156)
-
-### Lava
-
-![GitHub Streak - Lava](https://github-streaks-mqc9.onrender.com/streak/ryuzinoh/image?theme=lava&cache-bust=1741206156)
-
-### Golden Shade
-
-![GitHub Streak - Golden Shade](https://github-streaks-mqc9.onrender.com/streak/ryuzinoh/image?theme=goldenshade&cache-bust=1741206156)
+Replace `USERNAME` with your GitHub username and `THEME_NAME` with one of the themes above.
