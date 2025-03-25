@@ -79,6 +79,38 @@ class TranslationService:
                          '\u096B', '\u096C', '\u096D', '\u096E', '\u096F'],
                 font_family="font-family: 'Mangal', 'Poppins', 'Noto Sans Devanagari', sans-serif;"
             )
+            ,
+            # japanese
+"ja": LanguageConfig(
+    strings={
+        "access_denied": [
+            "アクセス拒否",
+            "このルートを使用する権限がありません。",
+            "間違いだと思われる場合は、",
+            "管理者に連絡してください。"
+        ],
+        "total_contributions": "総コントリビューション",
+        "ongoing_streak": "現在のストリーク",
+        "days": "日",
+        "year_progress": "{}% 進捗 ({}年)",
+        "months": {
+            1: "1月",
+            2: "2月",
+            3: "3月",
+            4: "4月",
+            5: "5月",
+            6: "6月",
+            7: "7月",
+            8: "8月",
+            9: "9月",
+            10: "10月",
+            11: "11月",
+            12: "12月"
+        }
+    },
+    numerals=['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
+    font_family="font-family: 'Noto Sans JP', 'Poppins', sans-serif;"
+)
         }
 
 # NECESSARY DEFINATIONS
