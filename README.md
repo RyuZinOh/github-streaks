@@ -1,17 +1,7 @@
-# GitHub Streak Tracker
-
-Track and display your GitHub contribution streaks with beautiful themes.
-
-## Available Themes
-
-### Dark Themes
-
+### Available themes
 - Midnight
 - Dark Knight
 - Matrix
-
-### Colorful Themes
-
 - Sunset
 - Ocean
 - Forest
@@ -20,15 +10,7 @@ Track and display your GitHub contribution streaks with beautiful themes.
 - Galaxy
 - Aurora
 - Lava
-
-### Metallic/Shimmer Themes
-
 - Rose Gold
 - Golden Shade
 
-## Usage
-
-Simply use the URL format:  
-`hosted_url_end/streak/USERNAME/image?theme=THEME_NAME`
-
-Replace `USERNAME` with your GitHub username and `THEME_NAME` with one of the themes above.
+[DOCUMENTATION](https://gitstreakx.vercel.app/)
